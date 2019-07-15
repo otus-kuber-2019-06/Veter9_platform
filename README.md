@@ -108,4 +108,175 @@ controller-manager   Healthy   ok
 scheduler            Healthy   ok                  
 etcd-0               Healthy   {"health":"true"}   
 ```
-# 
+
+# dockerfile:
+```
+FROM python:3.6.0-alpine
+RUN mkdir /app
+COPY app/homework.html /app
+WORKDIR /app
+EXPOSE 8000
+USER 1001
+CMD ["python3", "-m", "http.server", "8000"]
+```
+# docker build -t veter9/python36 .
+```
+Sending build context to Docker daemon  3.584kB
+Step 1/7 : FROM python:3.6.0-alpine
+ ---> cb178ebbf0f2
+Step 2/7 : RUN mkdir /app
+ ---> Using cache
+ ---> 6a7319ce90a0
+Step 3/7 : COPY app/homework.html /app
+ ---> ad85545f8e06
+Step 4/7 : WORKDIR /app
+ ---> Running in 8588a2a2ca13
+Removing intermediate container 8588a2a2ca13
+ ---> 2301922b3d4a
+Step 5/7 : EXPOSE 8000
+ ---> Running in 9834d67ae4a1
+Removing intermediate container 9834d67ae4a1
+ ---> 5fdcf59be36b
+Step 6/7 : USER 1001
+ ---> Running in ad93e039d8e4
+Removing intermediate container ad93e039d8e4
+ ---> ca434c909a6f
+Step 7/7 : CMD ["python3", "-m", "http.server", "8000"]
+ ---> Running in 262ab92c3eb9
+Removing intermediate container 262ab92c3eb9
+ ---> adf8f262f6cf
+Successfully built adf8f262f6cf
+Successfully tagged veter9/python36:latest
+```
+
+# sudo docker login
+```
+Login with your Docker ID to push and pull images from Docker Hub. If you don't have a Docker ID, head over to https://hub.docker.com to create one.
+Username: veter9
+Password: 
+WARNING! Your password will be stored unencrypted in /root/snap/docker/384/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+Login Succeeded
+```
+# sudo docker push veter9/python36
+``` 
+The push refers to repository [docker.io/veter9/python36]
+f6d8a0b2b184: Pushed 
+d42244823e3c: Pushed 
+7def4548bbc9: Mounted from library/python 
+d13764a9eea3: Mounted from library/python 
+af4997faab5b: Mounted from library/python 
+9f8566ee5135: Mounted from library/python 
+latest: digest: sha256:c68f6bdac3170e81306b70bbe1d608e62025bdf4a098dec7d63b45e13516a642 size: 1570
+```
+# kubectl apply -f web-pod.yaml 
+```
+pod/web created
+```
+# kubectl get pod
+```
+NAME   READY   STATUS    RESTARTS   AGE
+web    1/1     Running   0          74s
+```
+# kubectl get pod web -o yaml
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Pod","metadata":{"annotations":{},"labels":{"key":"web"},"name":"web","namespace":"default"},"spec":{"containers":[{"image":"veter9/python36","name":"web","resources":{"limits":{"cpu":"400m","memory":"512Mi"},"requests":{"cpu":"200m","memory":"256Mi"}}}]}}
+  creationTimestamp: "2019-07-15T06:18:27Z"
+  labels:
+    key: web
+  name: web
+  namespace: default
+  resourceVersion: "7594"
+  selfLink: /api/v1/namespaces/default/pods/web
+  uid: 49af49cc-f9a5-4ade-bb15-6e4f62e30d47
+spec:
+  containers:
+  - image: veter9/python36
+    imagePullPolicy: Always
+    name: web
+    resources:
+      limits:
+        cpu: 400m
+        memory: 512Mi
+      requests:
+        cpu: 200m
+        memory: 256Mi
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: default-token-48fgr
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: minikube
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: default-token-48fgr
+    secret:
+      defaultMode: 420
+      secretName: default-token-48fgr
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2019-07-15T06:18:27Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2019-07-15T06:19:13Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2019-07-15T06:19:13Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2019-07-15T06:18:27Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://d5e8d59c869c12a0e200c9994eafa1548259d480cf0c3830df1cf5f673ed4650
+    image: veter9/python36:latest
+    imageID: docker-pullable://veter9/python36@sha256:c68f6bdac3170e81306b70bbe1d608e62025bdf4a098dec7d63b45e13516a642
+    lastState: {}
+    name: web
+    ready: true
+    restartCount: 0
+    state:
+      running:
+        startedAt: "2019-07-15T06:19:12Z"
+  hostIP: 10.0.2.15
+  phase: Running
+  podIP: 172.17.0.2
+  qosClass: Burstable
+  startTime: "2019-07-15T06:18:27Z"
+```
+
+# kubectl port-forward --address 0.0.0.0 pod/web 8000:8000
+```
+Forwarding from 0.0.0.0:8000 -> 8000
+Handling connection for 8000
+Handling connection for 8000
+```

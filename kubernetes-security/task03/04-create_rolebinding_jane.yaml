@@ -4,10 +4,10 @@ kind: RoleBinding
 metadata:
   name: admin-jane
   namespace: dev
-subjects:
-  - kind: ServiceAccount
-    name: jane
 roleRef:
   kind: Role
   name: admin
-  apiGroup: rbac.authorization.k8s.io/v1
+  apiGroup: rbac.authorization.k8s.io  
+subjects:
+  - kind: ServiceAccount
+    name: jane

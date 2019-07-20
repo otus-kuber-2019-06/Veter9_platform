@@ -4,7 +4,7 @@ kind: ClusterRole
 metadata:
  name: pod-viewer
 rules:
-  - apiGroup: ""
+  - apiGroups: [""]
     resources: ["pods"]
     verbs: ["get", "list", "watch"]  
   

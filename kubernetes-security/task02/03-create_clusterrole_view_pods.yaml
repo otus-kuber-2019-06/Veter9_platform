@@ -2,10 +2,9 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
- namespace: prometheus
  name: pod-viewer
 rules:
-  - apiGroups: ["*"]
+  - apiGroup: ""
     resources: ["pods"]
     verbs: ["get", "list", "watch"]  
   

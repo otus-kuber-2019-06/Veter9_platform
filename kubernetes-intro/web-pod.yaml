@@ -8,6 +8,15 @@ spec:
   containers:
   - name: web
     image: veter9/python36
+    readinessProbe:
+      httpGet:
+        path: /index.html
+        port: 80
+    livenessProbe:
+      tcpSocket:
+        port: 8000
+      initialDelaySeconds: 5
+      periodSeconds: 10    
     volumeMounts:
     - name: app
       mountPath: /app
